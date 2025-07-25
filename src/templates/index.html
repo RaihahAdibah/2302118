@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Search App</title>
+    <title>Search</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         .search-box { margin-bottom: 20px; }
@@ -18,22 +18,6 @@
             <button type="submit">Submit</button>
         </form>
     </div>
-
-    <h2>Previous Submissions</h2>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Search Term</th>
-            <th>Time</th>
-        </tr>
-        {% for sub in submissions %}
-        <tr>
-            <td>{{ sub.id }}</td>
-            <td>{{ sub.search_term }}</td>
-            <td>{{ sub.submit_time }}</td>
-        </tr>
-        {% endfor %}
-    </table>
 
     <p>Git server: <a href="/git/">http://localhost/git/</a></p>
 </body>
