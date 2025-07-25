@@ -1,29 +1,44 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
-    volumes:
-      - .:/app
-    environment:
-      - PYTHONPATH=/app
-    expose:
-      - "5000" 
-
-  nginx:
-    build: ./nginx
+  nginxwebsvr:
+    image: nginx:alpine
+    container_name: nginxwebsvr
     ports:
-      - "8080:80"  
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - app
-  
+      - webapp
+
   mysqldb:
-      image: mysql:8.0
-      restart: always
-      volumes:
+    image: mysql:8.0
+    restart: always
+    volumes:
       - ./mysql_data:/var/lib/mysql
-      environment:
-        MYSQL_ROOT_PASSWORD: pass
-        MYSQL_DATABASE: testdb
-        MYSQL_USER: user
-        MYSQL_PASSWORD: pass
+    environment:
+      MYSQL_ROOT_PASSWORD: pass
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+
+  git-server:
+    build:
+      dockerfile: .gitserver.Dockerfile
+      context: .
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./repos:/var/www/git
+
+  webapp:
+    build: ./src
+    restart: always
+    environment:
+      MYSQL_HOST: mysqldb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+      MYSQL_DB: testdb
+    depends_on:
+      - mysqldb

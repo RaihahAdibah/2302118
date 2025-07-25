@@ -1,46 +1,51 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, render_template, request, redirect
+import mysql.connector
 
 app = Flask(__name__)
 
-# HTML template with search form
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Hello World with Search</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .search-box { margin: 20px 0; }
-        .result { margin-top: 20px; padding: 10px; border: 1px solid #ddd; }
-    </style>
-</head>
-<body>
-    <h1>Hello World!</h1>
-    
-    <div class="search-box">
-        <form method="GET" action="/search">
-            <input type="text" name="query" placeholder="Search something..." required>
-            <button type="submit">Search</button>
-        </form>
-    </div>
+# Database configuration
+db_config = {
+    'host': 'mysqldb',
+    'user': 'user',
+    'password': 'pass',
+    'database': 'testdb'
+}
 
-    {% if result %}
-    <div class="result">
-        <strong>You searched for:</strong> {{ result }}
-    </div>
-    {% endif %}
-</body>
-</html>
-"""
+# Initialize database table
+def init_db():
+    conn = mysql.connector.connect(**db_config)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS submissions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            search_term VARCHAR(255),
+            submit_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template_string(HTML_TEMPLATE)
-
-@app.route('/search')
-def search():
-    query = request.args.get('query', '')
-    return render_template_string(HTML_TEMPLATE, result=query)
+    if request.method == 'POST':
+        search_term = request.form.get('search')
+        # Save to database
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO submissions (search_term) VALUES (%s)', (search_term,))
+        conn.commit()
+        conn.close()
+        return redirect('/')
+    
+    # Get all submissions
+    conn = mysql.connector.connect(**db_config)
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM submissions ORDER BY submit_time DESC')
+    submissions = cursor.fetchall()
+    conn.close()
+    
+    return render_template('index.html', submissions=submissions)
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.0', port=5000)
+    init_db()
+    app.run(host='0.0.0.0', port=5000)

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .search-box { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Search and Submit</h1>
+    
+    <div class="search-box">
+        <form method="POST">
+            <input type="text" name="search" placeholder="Enter search term" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <h2>Previous Submissions</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Search Term</th>
+            <th>Time</th>
+        </tr>
+        {% for sub in submissions %}
+        <tr>
+            <td>{{ sub.id }}</td>
+            <td>{{ sub.search_term }}</td>
+            <td>{{ sub.submit_time }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <p>Git server: <a href="/git/">http://localhost/git/</a></p>
+</body>
+</html>
